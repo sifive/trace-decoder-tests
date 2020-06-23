@@ -71,9 +71,9 @@ $(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr jdqr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	java -cp ".;TraceDecoder.jar" jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q $(TESTNAME).stdout reference/$(TESTNAME).stdout \
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q $(TESTNAME).stderr reference/$(TESTNAME).stderr \
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
 	@echo PASS: $(REPORTNAME)

@@ -66,9 +66,9 @@ $(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	$(DQREXE) -h > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q reference/$(TESTNAME).stdout $(TESTNAME).stdout \
+	diff -q --strip-trailing-cr reference/$(TESTNAME).stdout $(TESTNAME).stdout \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q reference/$(TESTNAME).stderr $(TESTNAME).stderr \
+	diff -q --strip-trailing-cr reference/$(TESTNAME).stderr $(TESTNAME).stderr \
 		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
 	@echo PASS: $(REPORTNAME)
