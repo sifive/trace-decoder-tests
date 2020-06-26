@@ -1,6 +1,7 @@
 
 ifeq ($(DQRPATH),)
-    DQRTP := $(realpath .)
+    DQR := $(shell which dqr)
+    DQRTP := $(realpath $(dir $(DQR))..)
 else
     DQRTP := $(realpath $(DQRPATH))
 endif
@@ -17,6 +18,8 @@ ifeq ($(OS),Windows_NT)
     ifeq ($(DQRLIB),)
         DQRLIB := $(LIBPATH)/dqr.dll
     endif
+
+    PLATFORM := windows
 else
     ifeq ($(DQREXE),)
         DQREXE := $(BINPATH)/dqr
@@ -25,10 +28,14 @@ else
     ifeq ($(DQRLIB),)
         DQRLIB := $(LIBPATH)/dqr.so
     endif
+
+    PLATFORM := unix
 endif
 
-ifeq ($(REPORTPATH),)
-    REPORTPATH := .
+ifeq ($(RESULTPATH),)
+    RSLTPATH := $(realpath .)
+else
+    RSLTPATH := $(realpath $(RESULTPATH))
 endif
 
 ifeq ($(LS),)
@@ -37,38 +44,40 @@ endif
 
 TESTNAME := $(patsubst %.rtd,%,$(wildcard *.rtd))
 
-REPORTNAME := $(lastword $(subst /, ,$(shell pwd)))
+RESULTNAME := $(lastword $(subst /, ,$(shell pwd)))
 
-.PHONY: test clean report
+.PHONY: test clean result
 
 test: $(TESTNAME).pass
 
 clean:
-	rm -f report.txt $(TESTNAME).pass $(TESTNAME).fail
+	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
+	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
+	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 
-report:
+result:
 	if [ -e $(TESTNAME).pass ]; then \
-		echo PASS: $(REPORTNAME) `date -r $(TESTNAME).pass` >> $(REPORTPATH)/report.txt; \
+		echo PASS: $(RESULTNAME) `date -r $(TESTNAME).pass` >> $(RSLTPATH)/result.log; \
 	else if [ -e $(TESTNAME).fail ]; then \
-			echo FAIL: $(REPORTNAME) `date -r $(TESTNAME).fail` >> $(REPORTPATH)/report.txt; \
+			echo FAIL: $(RESULTNAME) `date -r $(TESTNAME).fail` >> $(RSLTPATH)/result.log; \
 		else \
-			echo NOT RUN: $(REPORTNAME) >> $(REPORTPATH)/report.txt; \
+			echo NOT RUN: $(RESULTNAME) >> $(RSLTPATH)/result.log; \
 		fi \
 	fi
 
-reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
-	cd reference; unzip -o $(TESTNAME).stdout.zip; touch $(TESTNAME).stdout
+reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
+	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
-reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
-	cd reference; unzip -o $(TESTNAME).stderr.zip; touch $(TESTNAME).stderr
+reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
+	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
 
-$(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
+$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
-	@echo PASS: $(REPORTNAME)
+	@echo PASS: $(RESULTNAME)

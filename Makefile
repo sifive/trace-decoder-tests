@@ -1,19 +1,9 @@
-# Use "make --always-make test" to run all tests
-# Use "make --keep-going test" to keep running if there is a test failure
-# Each test must have its own Makefile with the targets test, clean, report
-
-# Note: make does not like '\' for directory separators; use '/'
-# But if running on windows, set paths with `\` on command line args, such as
-# make DQRPATH=\foo\dog
-
-# usage: make [ DQRPATH=<path> ] [ REPORTPATH=<path> ] [clean] [test] [report]
-
-# check if abspath should be realpath?
 
 CURRENTDIR := $(realpath .)
 
 ifeq ($(DQRPATH),)
-    DQRTOOLSPATH := $(CURRENTDIR)
+    DQR := $(shell which dqr)
+    DQRTOOLSPATH := $(realpath $(dir $(DQR))..)
 else
     DQRTOOLSPATH := $(realpath $(DQRPATH))
 endif
@@ -33,30 +23,33 @@ else
     LS := ls
 endif
 
-ifeq ($(REPORTPATH),)
-    RPTDIR := $(CURRENTDIR)
+ifeq ($(RESULTPATH),)
+    RSLTDIR := $(CURRENTDIR)
 else
-    RPTDIR := $(realpath $(REPORTPATH))
+    RSLTDIR := $(realpath $(RESULTPATH))
 endif
 
 TESTDIRS = $(wildcard *.btm.test) $(wildcard *.htm.test) $(wildcard *.general.test)
 
-.PHONY: test clean report
+.PHONY: test clean result
+
+all: test result
 
 test:
 	for dir in $(TESTDIRS); do \
-		make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) REPORTPATH=$(RPTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
+	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
 
 clean:
-	rm -rf report.txt
+	rm -rf result.log
 	for dir in $(TESTDIRS); do \
-		make -C $$dir clean DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) REPORTPATH=$(RPTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
+	    make -C $$dir clean DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
 
-report:
-	mkdir -p $(RPTDIR)
-	rm -rf $(RPTDIR)/report.txt
+result:
+	mkdir -p $(RSLTDIR)
+	rm -rf $(RSLTDIR)/result.log
 	for dir in $(TESTDIRS); do \
-		make -C $$dir report DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) REPORTPATH=$(RPTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
+	    make -C $$dir result DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
+	if grep -q FAIL $(RSLTDIR)/result.log; then exit 1; fi

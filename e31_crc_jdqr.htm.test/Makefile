@@ -1,6 +1,7 @@
 
 ifeq ($(DQRPATH),)
-    DQRTP := $(realpath .)
+    DQR := $(shell which dqr)
+    DQRTP := $(realpath $(dir $(DQR))..)
 else
     DQRTP := $(realpath $(DQRPATH))
 endif
@@ -11,24 +12,34 @@ JAVAPATH := $(DQRTP)/examples/java
 
 ifeq ($(OS),Windows_NT)
     ifeq ($(DQREXE),)
-        DQREXE := dqr.exe
+        DQREXE := $(BINPATH)/dqr.exe
     endif
 
     ifeq ($(DQRLIB),)
-        DQRLIB := dqr.dll
+        DQRLIB := $(LIBPATH)/dqr.dll
     endif
+
+    PLATFORM := windows
 else
     ifeq ($(DQREXE),)
-        DQREXE := dqr
+        DQREXE := $(BINPATH)/dqr
     endif
 
     ifeq ($(DQRLIB),)
-        DQRLIB := dqr.so
+        DQRLIB := $(LIBPATH)/libdqr.so
     endif
+
+    PLATFORM := unix
 endif
 
-ifeq ($(REPORTPATH),)
-    REPORTPATH := .
+ifeq ($(shell which $(DQREXE)),)
+    $(error Path not set for dqr)
+endif
+
+ifeq ($(RESULTPATH),)
+    RSLTPATH := $(realpath .)
+else
+    RSLTPATH := $(realpath $(RESULTPATH))
 endif
 
 ifeq ($(LS),)
@@ -37,43 +48,46 @@ endif
 
 TESTNAME := $(patsubst %.rtd,%,$(wildcard *.rtd))
 
-REPORTNAME := $(lastword $(subst /, ,$(shell pwd)))
+RESULTNAME := $(lastword $(subst /, ,$(shell pwd)))
 
-.PHONY: test clean report
+.PHONY: test clean result
 
 test: $(TESTNAME).pass
 
 clean:
-	rm -f jdqr.class report.txt $(TESTNAME).pass $(TESTNAME).fail
+	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
+	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
+	rm -f jdqr.java jdqr.class *.jar
+	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 
-report:
+result:
 	if [ -e $(TESTNAME).pass ]; then \
-		echo PASS: $(REPORTNAME) `date -r $(TESTNAME).pass` >> $(REPORTPATH)/report.txt; \
+		echo PASS: $(RESULTNAME) `date -r $(TESTNAME).pass` >> $(RSLTPATH)/result.log; \
 	else if [ -e $(TESTNAME).fail ]; then \
-			echo FAIL: $(REPORTNAME) `date -r $(TESTNAME).fail` >> $(REPORTPATH)/report.txt; \
+			echo FAIL: $(RESULTNAME) `date -r $(TESTNAME).fail` >> $(RSLTPATH)/result.log; \
 		else \
-			echo NOT RUN: $(REPORTNAME) >> $(REPORTPATH)/report.txt; \
+			echo NOT RUN: $(RESULTNAME) >> $(RSLTPATH)/result.log; \
 		fi \
 	fi
 
-reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
-	cd reference; unzip -o $(TESTNAME).stdout.zip; touch $(TESTNAME).stdout
+reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
+	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
-reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
-	cd reference; unzip -o $(TESTNAME).stderr.zip; touch $(TESTNAME).stderr
+reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
+	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
 
 jdqr.class:
-	cp "$(realpath $(JAVAPATH)/jdqr.java)" . || (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false);
-	cp "$(realpath $(LIBPATH)/*)" . || (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false);
-	javac jdqr.java -cp TraceDecoder.jar || (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false);
+	cp $(realpath $(JAVAPATH)/jdqr.java) . || (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false);
+	cp $(wildcard $(LIBPATH)/*) . || (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false);
+	javac jdqr.java -cp TraceDecoder.jar || (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false);
 
-$(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr jdqr.class
+$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr jdqr.class
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	java -cp ".;TraceDecoder.jar" jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
-		|| (echo FAIL: $(REPORTNAME); touch $(TESTNAME).fail; false)
+	java -Djava.library.path=`pwd` --class-path .:TraceDecoder.jar jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
-	@echo PASS: $(REPORTNAME)
+	@echo PASS: $(RESULTNAME)
