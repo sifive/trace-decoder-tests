@@ -67,9 +67,9 @@ result:
 	fi
 
 ifeq ($(PLATFORM),windows)
-	CLASSPATH := ".;TraceDEcoder.jar"
+    CLASSPATH := ".;TraceDecoder.jar"
 else
-	CLASSPATH := .:TraceDEcoder.jar
+    CLASSPATH := .:TraceDecoder.jar
 endif
 
 reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
@@ -85,7 +85,7 @@ jdqr.class:
 
 $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr jdqr.class
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	java -Djava.library.path=`pwd` --class-path ".;TraceDecoder.jar" jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	java -Djava.library.path=`pwd` --class-path $(CLASSPATH) jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
