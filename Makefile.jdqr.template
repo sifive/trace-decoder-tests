@@ -32,10 +32,6 @@ else
     PLATFORM := unix
 endif
 
-ifeq ($(shell which $(DQREXE)),)
-    $(error Path not set for dqr)
-endif
-
 ifeq ($(RESULTPATH),)
     RSLTPATH := $(realpath .)
 else
@@ -70,6 +66,12 @@ result:
 		fi \
 	fi
 
+ifeq ($(PLATFORM),windows)
+	CLASSPATH := ".;TraceDEcoder.jar"
+else
+	CLASSPATH := .:TraceDEcoder.jar
+endif
+
 reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
@@ -83,7 +85,7 @@ jdqr.class:
 
 $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr jdqr.class
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	java -Djava.library.path=`pwd` --class-path .:TraceDecoder.jar jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	java -Djava.library.path=`pwd` --class-path ".;TraceDecoder.jar" jdqr $(TESTNAME).rtd $(TESTNAME).elf > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
