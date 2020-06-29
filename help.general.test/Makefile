@@ -52,7 +52,7 @@ test: $(TESTNAME).pass
 clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
-	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
+	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
