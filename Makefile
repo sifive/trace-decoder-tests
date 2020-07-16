@@ -29,7 +29,7 @@ else
     RSLTDIR := $(realpath $(RESULTPATH))
 endif
 
-TESTDIRS = $(wildcard *.btm.test) $(wildcard *.htm.test) $(wildcard *.general.test)
+TESTDIRS = $(wildcard *.test)
 
 .PHONY: test clean result
 
