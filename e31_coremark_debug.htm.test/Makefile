@@ -46,7 +46,7 @@ TESTNAME := $(patsubst %.rtd,%,$(wildcard *.rtd))
 
 RESULTNAME := $(lastword $(subst /, ,$(shell pwd)))
 
-.PHONY: test clean result
+.PHONY: test clean result update
 
 test: $(TESTNAME).pass
 
@@ -65,6 +65,12 @@ result:
 		fi \
 	fi
 
+update:
+	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
+
 reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
@@ -73,7 +79,7 @@ reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
 
 $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -src -trace -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)

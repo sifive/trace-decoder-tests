@@ -46,7 +46,7 @@ TESTNAME := $(patsubst %.rtd,%,$(wildcard *.rtd))
 
 RESULTNAME := $(lastword $(subst /, ,$(shell pwd)))
 
-.PHONY: test clean result
+.PHONY: test clean result update
 
 test: $(TESTNAME).pass
 
@@ -65,6 +65,12 @@ result:
 			echo NOT RUN: $(RESULTNAME) >> $(RSLTPATH)/result.log; \
 		fi \
 	fi
+
+update:
+	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
 
 ifeq ($(PLATFORM),windows)
     CLASSPATH := ".;TraceDecoder.jar"

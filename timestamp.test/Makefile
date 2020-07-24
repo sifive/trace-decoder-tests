@@ -46,7 +46,11 @@ TESTNAME := $(patsubst %.rtd,%,$(wildcard *.rtd))
 
 RESULTNAME := $(lastword $(subst /, ,$(shell pwd)))
 
+<<<<<<< HEAD
+.PHONY: test clean result update
+=======
 .PHONY: test clean result
+>>>>>>> 7f058f083364404f6f61cf3500e93adf6e6d44f8
 
 test: $(TESTNAME).pass
 
@@ -65,6 +69,15 @@ result:
 		fi \
 	fi
 
+<<<<<<< HEAD
+update:
+	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
+
+=======
+>>>>>>> 7f058f083364404f6f61cf3500e93adf6e6d44f8
 reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
