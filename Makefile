@@ -36,7 +36,11 @@ TESTDIRS = $(wildcard *.test)
 all: test result
 
 test:
-	for dir in $(TESTDIRS); do \
+	if [ ! -x $(DQREXE) ]; then \
+	  echo "dqr executable not found"; \
+	  exit 1; \
+	fi
+	-for dir in $(TESTDIRS); do \
 	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
 

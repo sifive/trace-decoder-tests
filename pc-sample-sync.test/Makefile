@@ -79,7 +79,7 @@ reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
 
 $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -trace -src -branches -callreturn -trace -src -file -func -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -itcprint -trace -src -branches -callreturn -trace -src -file -func -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
