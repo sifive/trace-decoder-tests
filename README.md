@@ -20,6 +20,8 @@ The trace decoder tests are run by typing "make" in the trace decoder tests main
 
 /path/to/trace/decoder-tests/trace-decoder-tests$ make DQRPATH=/path/to/trace-decoder/install
 
+Note: On a Windows system, use the \ character in paths.
+
 The tests will be run and the results will be placed in result.log. There should be an entry in result.log for each test, indicating if it passed, failed, or was not run. Make will return 0 if all tests passed, or non-zero if there were failures.
 
 Alternatively, if your path is set to include the trace decoder install bin directory, the DQRPATH argument can be omitted from the make command. For this to work, the path environment variable must be set to point to the bin directory in the install folder. The makefile will assume the other components can be found by searching for them in the folders one level up from the trace decoder bin directory.
