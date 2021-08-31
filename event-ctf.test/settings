@@ -1,0 +1,4 @@
+rtd = event-all.rtd
+elf = event-all.elf
+ctfenable = true
+eventconversionenable = true
