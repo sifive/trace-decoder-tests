@@ -140,6 +140,10 @@ $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME)
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr ctf/metadata reference/metadata \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q ctf/$(TESTNAME)_0.ctf reference/$(TESTNAME)_0.ctf \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr events/$(TESTNAME).callret reference/$(TESTNAME).callret \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr events/$(TESTNAME).context reference/$(TESTNAME).context \

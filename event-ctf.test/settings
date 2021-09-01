@@ -1,4 +1,6 @@
 rtd = event-all.rtd
 elf = event-all.elf
+starttime = 0
+hostname = localhost
 ctfenable = true
 eventconversionenable = true
