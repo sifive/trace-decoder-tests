@@ -1,7 +1,4 @@
 
-CUTPATH := "\\eclipse-2020-03-rcp\\fs-master-runtime-taps\\e76_trace_all_ca_hello_1"
-NEWROOT := "."
-
 ifeq ($(DQRPATH),)
     DQR := $(shell which dqr)
     DQRTP := $(realpath $(dir $(DQR))..)
@@ -82,7 +79,7 @@ reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
 
 $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	$(DQREXE) -pf $(TESTNAME).trc -cutpath=$(CUTPATH),$(NEWROOT) -trace -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	$(DQREXE) -pf $(TESTNAME).trc -trace -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
