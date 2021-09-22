@@ -52,10 +52,11 @@ test: $(TESTNAME).pass
 
 clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
-	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
+	rm -f $(TESTNAME).stdout $(TESTNAME).stderr $(TESTNAME).events
 	rm -rf events
 	rm -rf ctf
 	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
+	rm -f reference/$(TESTNAME).events
 	rm -f reference/metadata reference/$(TESTNAME)_0.ctf
 	rm -f reference/$(TESTNAME).callret reference/$(TESTNAME).context reference/$(TESTNAME).control reference/$(TESTNAME).exception
 	rm -f reference/$(TESTNAME).interrupt reference/$(TESTNAME).periodic reference/$(TESTNAME).trigger reference/$(TESTNAME).watchpoint
@@ -83,6 +84,7 @@ update:
 	cp events/$(TESTNAME).periodic reference/$(TESTNAME).periodic
 	cp events/$(TESTNAME).trigger reference/$(TESTNAME).trigger
 	cp events/$(TESTNAME).watchpoint reference/$(TESTNAME).watchpoint
+	cp $(TESTNAME).events reference/$(TESTNAME).events
 	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
 	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
 	cd reference; zip -u $(TESTNAME).ctf.zip metadata
@@ -95,6 +97,7 @@ update:
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).periodic
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).trigger
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).watchpoint
+	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).events
 
 reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
@@ -132,7 +135,10 @@ reference/$(TESTNAME).trigger: reference/$(TESTNAME).events.zip
 reference/$(TESTNAME).watchpoint: reference/$(TESTNAME).events.zip
 	cd reference; unzip -o $(TESTNAME).events.zip $(notdir $@); touch $(notdir $@)
 
-$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr reference/metadata reference/$(TESTNAME)_0.ctf reference/$(TESTNAME).callret reference/$(TESTNAME).context reference/$(TESTNAME).control reference/$(TESTNAME).exception reference/$(TESTNAME).interrupt reference/$(TESTNAME).periodic reference/$(TESTNAME).trigger reference/$(TESTNAME).watchpoint
+reference/$(TESTNAME).events: reference/$(TESTNAME).events.zip
+	cd reference; unzip -o $(TESTNAME).events.zip $(notdir $@); touch $(notdir $@)
+
+$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr reference/metadata reference/$(TESTNAME)_0.ctf reference/$(TESTNAME).callret reference/$(TESTNAME).context reference/$(TESTNAME).control reference/$(TESTNAME).exception reference/$(TESTNAME).interrupt reference/$(TESTNAME).periodic reference/$(TESTNAME).trigger reference/$(TESTNAME).watchpoint reference/$(TESTNAME).events
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	$(DQREXE) -pf settings -trace -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
@@ -159,6 +165,8 @@ $(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME)
 	diff -q --strip-trailing-cr events/$(TESTNAME).trigger reference/$(TESTNAME).trigger \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr events/$(TESTNAME).watchpoint reference/$(TESTNAME).watchpoint \
+		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
+	diff -q --strip-trailing-cr $(TESTNAME).events reference/$(TESTNAME).events \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
 	@echo PASS: $(RESULTNAME)
