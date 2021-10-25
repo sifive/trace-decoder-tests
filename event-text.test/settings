@@ -1,0 +1,6 @@
+rtd = event-text.rtd
+elf = event-text.elf
+starttime = 0
+hostname = localhost
+ctfenable = false
+eventconversionenable = true
