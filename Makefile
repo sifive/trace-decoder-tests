@@ -12,6 +12,11 @@ ifeq ($(OS),Windows_NT)
     DQREXE := $(DQRTOOLSPATH)/bin/dqr.exe
     DQRLIB := $(DQRTOOLSPATH)/lib/dqr.dll
     LS := dir
+
+    ifeq ($(OBJDUMP),)
+        OBJDUMP := riscv64-unknown-elf-objdump.exe
+    endif
+
 else
     ifeq ($(CROSSPREFIX),x86_64-w64-mingw32-)
         #    if crossbuild, cannot test! exit with error
@@ -21,6 +26,10 @@ else
     DQREXE := $(DQRTOOLSPATH)/bin/dqr
     DQRLIB := $(DQRTOOLSPATH)/lib/dqr.so
     LS := ls
+
+    ifeq ($(OBJDUMP),)
+        OBJDUMP := riscv64-unknown-elf-objdump
+    endif
 endif
 
 ifeq ($(RESULTPATH),)
@@ -41,7 +50,7 @@ test:
 	  exit 1; \
 	fi
 	-for dir in $(TESTDIRS); do \
-	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
+	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP="$(OBJDUMP)"; \
 	done
 
 clean:

@@ -19,6 +19,12 @@ ifeq ($(OS),Windows_NT)
         DQRLIB := $(LIBPATH)/dqr.dll
     endif
 
+    ifneq ($(OBJDUMP),)
+        OD := $(subst :,\\,$(subst \,:,$(OBJDUMP)))
+    else
+        OD :=
+    endif
+
     PLATFORM := windows
 else
     ifeq ($(DQREXE),)
@@ -27,6 +33,12 @@ else
 
     ifeq ($(DQRLIB),)
         DQRLIB := $(LIBPATH)/dqr.so
+    endif
+
+    ifneq ($(OBJDUMP),)
+        OD := $(OBJDUMP)
+    else
+        OD :=
     endif
 
     PLATFORM := unix
@@ -54,7 +66,7 @@ clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr $(TESTNAME).events
 	rm -rf events
-	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
+	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 	rm -f reference/$(TESTNAME).events
 	rm -f reference/$(TESTNAME).callret reference/$(TESTNAME).control reference/$(TESTNAME).periodic
 
@@ -69,23 +81,23 @@ result:
 	fi
 
 update:
-	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
-	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
+	cp $(TESTNAME).stdout reference/$(TESTNAME).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).stderr
 	cp events/$(TESTNAME).callret reference/$(TESTNAME).callret
 	cp events/$(TESTNAME).control reference/$(TESTNAME).control
 	cp events/$(TESTNAME).periodic reference/$(TESTNAME).periodic
 	cp $(TESTNAME).events reference/$(TESTNAME).events
-	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
-	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).stderr
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).callret
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).control
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).periodic
 	cd reference; zip -u $(TESTNAME).events.zip $(TESTNAME).events
 
-reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
+reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
-reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
+reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
 
 reference/$(TESTNAME).callret: reference/$(TESTNAME).events.zip
@@ -100,13 +112,20 @@ reference/$(TESTNAME).periodic: reference/$(TESTNAME).events.zip
 reference/$(TESTNAME).events: reference/$(TESTNAME).events.zip
 	cd reference; unzip -o $(TESTNAME).events.zip $(notdir $@); touch $(notdir $@)
 
-$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr reference/$(TESTNAME).callret reference/$(TESTNAME).control reference/$(TESTNAME).periodic reference/$(TESTNAME).events
+$(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr reference/$(TESTNAME).callret reference/$(TESTNAME).control reference/$(TESTNAME).periodic reference/$(TESTNAME).events
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	$(DQREXE) -pf settings -trace -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	@echo rtd = event-text.rtd > opts
+	@echo elf = event-text.elf >> opts
+	@echo starttime = 0 >> opts
+	@echo hostname = localhost >> opts
+	@echo ctfenable = false >> opts
+	@echo eventconversionenable = true >> opts
+	@echo objdump = $(OD) >> opts
+	$(DQREXE) -pf opts -trace -src -branches -callreturn -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr events/$(TESTNAME).callret reference/$(TESTNAME).callret \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
