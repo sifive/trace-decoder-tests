@@ -20,6 +20,13 @@ else
 
     DQREXE := $(DQRTOOLSPATH)/bin/dqr
     DQRLIB := $(DQRTOOLSPATH)/lib/dqr.so
+
+    ifeq ($(LDLIBRARY_PATH),)
+        LD_LIBRARY_PATH := $(realpath ./)
+    else
+        LD_LIBRARY_PATH := $(realpath ./):$(LD_LIBRARY_PATH)
+    endif
+
     LS := ls
 endif
 
@@ -55,7 +62,7 @@ test:
 	  exit 1; \
 	fi
 	-for dir in $(TESTDIRS); do \
-	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP=$(OBJDUMPEXE); \
+	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP=$(OBJDUMPEXE) LD_LIBRARY_PATH=$(LD_LIBRARY_PATH); \
 	done
 
 clean:
@@ -73,7 +80,7 @@ result:
 	-ls -l $(DQRTOOLSPATH)
 	-ls -l $(DQREXE)
 	-ls -l $(OBJDUMPEXE)
-	-cat $(RSLTDIR)/result.log
-	-cat nls.test/nls.sdtout
+	-cat nls.test/nls.stdout
 	-cat nls.test/nls.stderr
+	-cat $(RSLTDIR)/result.log
 	if grep -q FAIL $(RSLTDIR)/result.log; then exit 1; fi
