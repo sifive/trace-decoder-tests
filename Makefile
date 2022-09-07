@@ -31,7 +31,6 @@ ifeq ($(OBJDUMP),)
     OBJDUMPEXE := $(RISCV_PATH)/riscv64-unknown-elf-objdump
 else
     OBJDUMPEXE := $(realpath $(OBJDUMP))
-    $(info objdumpexe: $(OBJDUMPEXE))
 endif
 
 ifeq ($(RESULTPATH),)
@@ -56,7 +55,7 @@ test:
 	  exit 1; \
 	fi
 	-for dir in $(TESTDIRS); do \
-	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP="$(OBJDUMPEXE)"; \
+	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP=$(OBJDUMPEXE); \
 	done
 
 clean:
