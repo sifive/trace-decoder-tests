@@ -70,10 +70,10 @@ result:
 	for dir in $(TESTDIRS); do \
 	    make -C $$dir result DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
-	ls -l $(DQRTOOLSPATH)
-	ls -l $(DQREXE)
-	ls -l $(OBJDUMPEXE)
-	cat $(RSLTDIR)/result.log
-	cat nls.test/nls.sdtout
-	cat nls.test/nls.stderr
+	-ls -l $(DQRTOOLSPATH)
+	-ls -l $(DQREXE)
+	-ls -l $(OBJDUMPEXE)
+	-cat $(RSLTDIR)/result.log
+	-cat nls.test/nls.sdtout
+	-cat nls.test/nls.stderr
 	if grep -q FAIL $(RSLTDIR)/result.log; then exit 1; fi
