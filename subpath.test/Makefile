@@ -10,6 +10,12 @@ else
     DQRTP := $(realpath $(DQRPATH))
 endif
 
+ifneq ($(OBJDUMP),)
+    OD := $(subst :,\\,$(subst \,:,$(OBJDUMP)))
+else
+    OD :=
+endif
+
 BINPATH := $(DQRTP)/bin
 LIBPATH := $(DQRTP)/lib
 JAVAPATH := $(DQRTP)/examples/java
@@ -58,7 +64,7 @@ clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
 	rm -f subpath.java subpath.class *.jar
-	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
+	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
@@ -71,10 +77,10 @@ result:
 	fi
 
 update:
-	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
-	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
-	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
-	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
+	cp $(TESTNAME).stdout reference/$(TESTNAME).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).stderr
 
 ifeq ($(PLATFORM),windows)
     CLASSPATH := ".;TraceDecoder.jar"
@@ -82,10 +88,10 @@ else
     CLASSPATH := .:TraceDecoder.jar
 endif
 
-reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
+reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
-reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
+reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
 
 subpath.class:
@@ -93,13 +99,13 @@ subpath.class:
 	cp $(wildcard $(LIBPATH)/*) . || (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false);
 	javac subpath.java -cp TraceDecoder.jar || (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false);
 
-$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr subpath.class
+$(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr subpath.class
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	java -Djava.library.path=`pwd` --class-path $(CLASSPATH) subpath $(TESTNAME).rtd $(TESTNAME).elf $(CUTPATH) $(NEWROOT) > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	java -Djava.library.path=`pwd` --class-path $(CLASSPATH) subpath $(TESTNAME).rtd $(TESTNAME).elf $(CUTPATH) $(NEWROOT) $(OD) > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
 	@echo PASS: $(RESULTNAME)

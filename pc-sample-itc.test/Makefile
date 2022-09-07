@@ -6,6 +6,12 @@ else
     DQRTP := $(realpath $(DQRPATH))
 endif
 
+ifneq ($(OBJDUMP),)
+    OD := -od $(subst :,\\,$(subst \,:,$(OBJDUMP)))
+else
+    OD :=
+endif
+
 BINPATH := $(DQRTP)/bin
 LIBPATH := $(DQRTP)/lib
 JAVAPATH := $(DQRTP)/examples/java
@@ -53,7 +59,7 @@ test: $(TESTNAME).pass
 clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
-	rm -f reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
+	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
@@ -66,24 +72,24 @@ result:
 	fi
 
 update:
-	cp $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout
-	cp $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr
-	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).$(PLATFORM).stdout
-	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).$(PLATFORM).stderr
+	cp $(TESTNAME).stdout reference/$(TESTNAME).stdout
+	cp $(TESTNAME).stderr reference/$(TESTNAME).stderr
+	cd reference; zip -u $(TESTNAME).stdout.zip $(TESTNAME).stdout
+	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).stderr
 
-reference/$(TESTNAME).$(PLATFORM).stdout: reference/$(TESTNAME).stdout.zip
+reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
 	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
 
-reference/$(TESTNAME).$(PLATFORM).stderr: reference/$(TESTNAME).stderr.zip
+reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
 
-$(TESTNAME).pass: reference/$(TESTNAME).$(PLATFORM).stdout reference/$(TESTNAME).$(PLATFORM).stderr
+$(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
-	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -trace -src -branches -callreturn -trace -src -file -func -analytics=2 > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
+	$(DQREXE) -t $(TESTNAME).rtd -e $(TESTNAME).elf -trace -src -branches -callreturn -trace -src -file -func -analytics=2 > $(TESTNAME).stdout $(OD) 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).$(PLATFORM).stdout \
+	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).$(PLATFORM).stderr \
+	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	touch $(TESTNAME).pass
 	@echo PASS: $(RESULTNAME)
