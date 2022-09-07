@@ -74,4 +74,6 @@ result:
 	ls -l $(DQREXE)
 	ls -l $(OBJDUMPEXE)
 	cat $(RSLTDIR)/result.log
+	cat nls.test/nls.sdtout
+	cat nls.test/nls.stderr
 	if grep -q FAIL $(RSLTDIR)/result.log; then exit 1; fi
