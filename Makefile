@@ -77,6 +77,7 @@ result:
 	for dir in $(TESTDIRS); do \
 	    make -C $$dir result DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
+	-which riscv64-unknown-elf-objdump
 	-ls -l $(DQRTOOLSPATH)
 	-ls -l $(DQREXE)
 	-ls -l $(OBJDUMPEXE)
