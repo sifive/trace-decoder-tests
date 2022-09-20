@@ -21,12 +21,6 @@ else
     DQREXE := $(DQRTOOLSPATH)/bin/dqr
     DQRLIB := $(DQRTOOLSPATH)/lib/dqr.so
 
-    ifeq ($(LDLIBRARY_PATH),)
-        LD_LIBRARY_PATH := $(realpath ./)
-    else
-        LD_LIBRARY_PATH := $(realpath ./):$(LD_LIBRARY_PATH)
-    endif
-
     LS := ls
 endif
 
@@ -62,7 +56,7 @@ test:
 	  exit 1; \
 	fi
 	-for dir in $(TESTDIRS); do \
-	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP=$(OBJDUMPEXE) LD_LIBRARY_PATH=$(LD_LIBRARY_PATH); \
+	    make -C $$dir test DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH) OBJDUMP=$(OBJDUMPEXE); \
 	done
 
 clean:
