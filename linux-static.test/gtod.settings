@@ -1,0 +1,16 @@
+# auto-generated settings file
+cmdLine = /home/root/tracer/tracer trace instnoopt sow context sba=4000k write gtod.rtd app ./gtod
+archsize = 64
+isa = rv64imafdcv_zicsr_zifencei_zfh_zba_zbb_zvfh_xsfvfhbfmin_xsfvfnrclipxfqf_xsfvfwmaccqqq_xsfvqmaccqoq
+addrbits = 48
+clockfreq = 32500000
+timebasefreq = 10833333
+srcbits = 2
+teinstruction = teInstHTMSyncNoOpt
+rtd = gtod.rtd
+pids = 738
+map = 738,gtod.map
+vdso = gtod.vdso
+#kmempath = ./kmem
+kmempath = /home/brad/kmem
+# add path to objdump below

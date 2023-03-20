@@ -1,0 +1,2 @@
+This trace file seems to be bad. Check around trace messages 515, 516. It seems to generate two sync messages back-to-back.
+The destination of # 516 is totally wrong.

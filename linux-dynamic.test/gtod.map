@@ -1,0 +1,15 @@
+55555802c000-55555802d000 r-xp 00000000 b3:04 528326                     /home/root/master/gtod.dynamic/gtod
+55555802d000-55555802e000 r--p 00000000 b3:04 528326                     /home/root/master/gtod.dynamic/gtod
+55555802e000-55555802f000 rw-p 00001000 b3:04 528326                     /home/root/master/gtod.dynamic/gtod
+55555802f000-555558050000 rw-p 00000000 00:00 0                          [heap]
+7fffb13a4000-7fffb14bd000 r-xp 00000000 b3:04 837                        /lib/libc.so.6
+7fffb14bd000-7fffb14be000 ---p 00119000 b3:04 837                        /lib/libc.so.6
+7fffb14be000-7fffb14c1000 r--p 00119000 b3:04 837                        /lib/libc.so.6
+7fffb14c1000-7fffb14c3000 rw-p 0011c000 b3:04 837                        /lib/libc.so.6
+7fffb14c3000-7fffb14d1000 rw-p 00000000 00:00 0 
+7fffb14dd000-7fffb14df000 r--p 00000000 00:00 0                          [vvar]
+7fffb14df000-7fffb14e1000 r-xp 00000000 00:00 0                          [vdso]
+7fffb14e1000-7fffb1500000 r-xp 00000000 b3:04 832                        /lib/ld-linux-riscv64-lp64d.so.1
+7fffb1500000-7fffb1502000 r--p 0001e000 b3:04 832                        /lib/ld-linux-riscv64-lp64d.so.1
+7fffb1502000-7fffb1504000 rw-p 00020000 b3:04 832                        /lib/ld-linux-riscv64-lp64d.so.1
+7fffff9f6000-7fffffa17000 rw-p 00000000 00:00 0                          [stack]

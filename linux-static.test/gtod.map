@@ -1,0 +1,7 @@
+00010000-00070000 r-xp 00000000 b3:04 524622                             /home/root/master/gtod.static/gtod
+00070000-00074000 r--p 0005f000 b3:04 524622                             /home/root/master/gtod.static/gtod
+00074000-00077000 rw-p 00063000 b3:04 524622                             /home/root/master/gtod.static/gtod
+00077000-0009e000 rw-p 00000000 00:00 0                                  [heap]
+7fff98e41000-7fff98e43000 r--p 00000000 00:00 0                          [vvar]
+7fff98e43000-7fff98e45000 r-xp 00000000 00:00 0                          [vdso]
+7fffed3df000-7fffed400000 rw-p 00000000 00:00 0                          [stack]
