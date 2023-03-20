@@ -71,11 +71,5 @@ result:
 	for dir in $(TESTDIRS); do \
 	    make -C $$dir result DQREXE=$(DQREXE) DQRLIB=$(DQRLIB) RESULTPATH=$(RSLTDIR) LS=$(LS) DQRPATH=$(DQRTOOLSPATH); \
 	done
-	-which riscv64-unknown-elf-objdump
-	-ls -l $(DQRTOOLSPATH)
-	-ls -l $(DQREXE)
-	-ls -l $(OBJDUMPEXE)
-	-cat nls.test/nls.stdout
-	-cat nls.test/nls.stderr
 	-cat $(RSLTDIR)/result.log
 	if grep -q FAIL $(RSLTDIR)/result.log; then exit 1; fi
