@@ -12,4 +12,5 @@ pids = 799
 map = 799,gtod.map
 vdso = gtod.vdso
 kmempath = ./kmem
+tolerateerrors = true
 # add path to objdump below
