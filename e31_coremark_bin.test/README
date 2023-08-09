@@ -1,0 +1,6 @@
+This trace file seems to be bad. Check around trace messages 515, 516. It seems to generate two sync messages back-to-back.
+The destination of # 516 is totally wrong.
+
+To generate a bin image file from a text file, use the risc V objcopy command and only capture the code sections, as in:
+
+riscv64-unknown-elf-objcopy -O binary -j .init -j .ctors -j .text e31_coremark.elf e31_coremark.bin

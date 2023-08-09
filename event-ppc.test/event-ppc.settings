@@ -1,0 +1,14 @@
+#archsize = 64
+#addrbits = 48
+#clockfreq = 32500000
+#timebasefreq = 10833333
+teinstruction = teInstHtm
+eventConversionEnable = true
+ppcevent0 = 0,1
+ppcevent1 = 2,3
+ppcevent2 = 4,5
+ppcevent3 = 6,7
+#ppcevent4 = 8,9
+ppcevent5 = 10,11
+ppcevent6 = 12,13
+ppcevent7 = 14,15
