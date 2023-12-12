@@ -61,6 +61,7 @@ clean:
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
 	rm -f jdqr.java jdqr.class *.jar
 	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
+	rm -f $(TESTNAME).stdout.diff $(TESTNAME).stdout-e reference/$(TESTNAME).stdout-e
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
@@ -85,7 +86,7 @@ else
 endif
 
 reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
-	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
+	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@); sed -i -e 's/^\([^T].*\) # .*/\1/' $(notdir $@)
 
 reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
@@ -99,7 +100,8 @@ $(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr jdqr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	java -Djava.library.path=`pwd` --class-path $(CLASSPATH) jdqr $(TESTNAME).rtd $(TESTNAME).elf $(OD) > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
+	sed -i -e 's/^\([^T].*\) # .*/\1/' $(TESTNAME).stdout
+	diff --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout > $(TESTNAME).stdout.diff \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)

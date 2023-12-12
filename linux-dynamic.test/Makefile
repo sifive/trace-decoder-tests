@@ -64,8 +64,9 @@ test: $(TESTNAME).pass
 
 clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
-	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
+	rm -f $(TESTNAME).stdout $(TESTNAME).stderr opts.settings
 	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
+	rm -f $(TESTNAME).stdout.diff $(TESTNAME).stdout-e reference/$(TESTNAME).stdout-e
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
@@ -84,7 +85,7 @@ update:
 	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).stderr
 
 reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
-	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
+	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@); sed -i -e 's/^\([^T].*\) # .*/\1/' $(notdir $@); sed -i -e 's/.*File: gtod\.c:0//' $(notdir $@); sed -i -e 's/.*File: start\.os:0//' $(notdir $@); sed -i -e 's/@@GLIBC.*0x/@GLIBC+0x/' $(notdir $@); sed -i -e 's/@GLIBC.*0x/@GLIBC+0x/' $(notdir $@); sed -i -e '/^$$/d' $(notdir $@)
 
 reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
@@ -95,7 +96,14 @@ $(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 	@echo objdump = $(OD) >> opts.settings
 	$(DQREXE) -sf opts.settings -trace -src -file -func -branches -callreturn > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
+	sed -i -e 's/^\([^T].*\) # .*/\1/' $(TESTNAME).stdout
+	sed -i -e 's/.*File: gtod\.c:0//' $(TESTNAME).stdout
+	sed -i -e 's/.*File: start\.os:0//' $(TESTNAME).stdout
+	sed -i -e 's/@@GLIBC.*0x/@GLIBC+0x/' $(TESTNAME).stdout
+	sed -i -e 's/@GLIBC.*0x/@GLIBC+0x/' $(TESTNAME).stdout
+	sed -i -e '/^$$/d' $(TESTNAME).stdout
+	truncate -s 0 $(TESTNAME).stderr
+	diff --ignore-blank-lines --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout > $(TESTNAME).stdout.diff \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)

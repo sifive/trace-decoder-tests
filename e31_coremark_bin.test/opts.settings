@@ -5,4 +5,4 @@ starttime = 0
 hostname = localhost
 ctfenable = false
 eventconversionenable = true
-objdump = /home/brad/riscv64-unknown-elf-objdump
+objdump = /Users/carsten.gosvig/dev-root/SiFive.pre-2023-10-24/riscv64-unknown-elf-toolsuite-14.9.0-2022.08.2/bin/riscv64-unknown-elf-objdump

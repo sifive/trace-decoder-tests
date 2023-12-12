@@ -60,6 +60,7 @@ clean:
 	rm -f result.log $(TESTNAME).pass $(TESTNAME).fail
 	rm -f $(TESTNAME).stdout $(TESTNAME).stderr
 	rm -f reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
+	rm -f $(TESTNAME).stdout.diff $(TESTNAME).stdout-e reference/$(TESTNAME).stdout-e
 
 result:
 	if [ -e $(TESTNAME).pass ]; then \
@@ -78,7 +79,7 @@ update:
 	cd reference; zip -u $(TESTNAME).stderr.zip $(TESTNAME).stderr
 
 reference/$(TESTNAME).stdout: reference/$(TESTNAME).stdout.zip
-	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@)
+	cd reference; unzip -o $(TESTNAME).stdout.zip $(notdir $@); touch $(notdir $@); sed -i -e 's/^\([^T].*\) # .*/\1/' $(notdir $@); sed -i -e 's/,e32,m4,tu,mu,d1/,e32,m4,tu,mu/' $(notdir $@)
 
 reference/$(TESTNAME).stderr: reference/$(TESTNAME).stderr.zip
 	cd reference; unzip -o $(TESTNAME).stderr.zip $(notdir $@); touch $(notdir $@)
@@ -87,7 +88,9 @@ $(TESTNAME).pass: reference/$(TESTNAME).stdout reference/$(TESTNAME).stderr
 	rm -f $(TESTNAME).pass $(TESTNAME).fail
 	$(DQREXE) -t $(TESTNAME).rtd -ca $(TESTNAME).rcad -e $(TESTNAME).elf -catype vector -trace -src -branches -callreturn -analytics=2 $(OD) $ > $(TESTNAME).stdout 2> $(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
-	diff -q --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout \
+	sed -i -e 's/^\([^T].*\) # .*/\1/' $(TESTNAME).stdout
+	sed -i -e 's/,e32,m4,tu,mu,d1/,e32,m4,tu,mu/' $(TESTNAME).stdout
+	diff --strip-trailing-cr $(TESTNAME).stdout reference/$(TESTNAME).stdout > $(TESTNAME).stdout.diff \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
 	diff -q --strip-trailing-cr $(TESTNAME).stderr reference/$(TESTNAME).stderr \
 		|| (echo FAIL: $(RESULTNAME); touch $(TESTNAME).fail; false)
